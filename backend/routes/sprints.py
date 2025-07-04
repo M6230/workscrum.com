@@ -6,7 +6,7 @@ sprints_bp = Blueprint('sprints', __name__)
 
 # Mostrar sprints (requiere token)
 @sprints_bp.route('/mostrar', methods=['GET'])
-#@jwt_required()
+@jwt_required()
 def showSprint():
     con = current_app.mysql.connection.cursor()
     con.execute("SELECT * FROM sprint WHERE SPR_ESTADO = 1")
@@ -25,7 +25,7 @@ def showSprint():
 
 # Crear sprint (requiere token)
 @sprints_bp.route('/crear', methods=['POST'])
-#@jwt_required()
+@jwt_required()
 def createSprint():
     campos_requeridos = ["SPR_FCH_INICIO", "SPR_FCH_FIN", "SPR_OBJETIVO"]
     peticion = request.json
@@ -125,6 +125,13 @@ def updateSprint(id):
 @jwt_required()
 def deleteSprint(id):
     con = current_app.mysql.connection.cursor()
+
+    con.execute("SELECT SPR_ID FROM sprint WHERE SPR_ID = %s", [id])
+    sprint = con.fetchone()
+
+    if not sprint:
+        return jsonify({"error": "Sprint no encontrado"}), 404
+
     con.execute("UPDATE sprint SET SPR_ESTADO = 0 WHERE SPR_ID = %s", [id])
     con.connection.commit()
 

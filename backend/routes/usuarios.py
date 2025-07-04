@@ -1,13 +1,12 @@
 from flask import Blueprint, request, jsonify, current_app
-from flask_jwt_extended import jwt_required 
-from werkzeug.security import generate_password_hash
+from flask_jwt_extended import jwt_required
 import uuid
 
 usuarios_bp = Blueprint('usuarios', __name__)
 
 # Mostrar usuarios (requiere token)
 @usuarios_bp.route('/mostrar', methods=['GET'])
-# @jwt_required()
+@jwt_required()
 def showUsuarios():
     con = current_app.mysql.connection.cursor()
     con.execute("SELECT * FROM usuarios WHERE USU_ESTADO = 1")
@@ -53,7 +52,7 @@ def createUsuario():
     rol = peticion["USU_ROL"]
     estado = 1
     uid = uuid.uuid4()
-    password = generate_password_hash(peticion["USU_CONTRASENA"])
+    password = peticion["USU_CONTRASENA"]
 
     con.execute("""
         INSERT INTO usuarios (USU_NOMBRE, USU_APELLIDO, USU_CORREO, USU_ROL, USU_ESTADO, USU_uid, USU_CONTRASENA)
@@ -109,6 +108,13 @@ def updateUsuario(id):
 @jwt_required()
 def deleteUsuario(id):
     con = current_app.mysql.connection.cursor()
+
+    con.execute("SELECT USU_ID FROM usuarios WHERE USU_ID = %s", [id])
+    usuario = con.fetchone()
+
+    if not usuario:
+        return jsonify({"error": "Usuario no encontrado"}), 404
+
     con.execute("UPDATE usuarios SET USU_ESTADO = 0 WHERE USU_id = %s", [id])
     con.connection.commit()
 

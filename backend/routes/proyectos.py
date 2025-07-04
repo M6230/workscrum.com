@@ -6,7 +6,7 @@ proyectos_bp = Blueprint('proyectos', __name__)
 
 # Mostrar proyectos (requiere token)
 @proyectos_bp.route('/mostrar', methods=['GET'])
-#@jwt_required()
+@jwt_required()
 def showProyectos():
     con = current_app.mysql.connection.cursor()
     con.execute("SELECT * FROM proyecto WHERE PROY_ESTADO = 1")
@@ -24,7 +24,7 @@ def showProyectos():
 
 # Crear proyecto (requiere token)
 @proyectos_bp.route('/crear', methods=['POST'])
-#@jwt_required()
+@jwt_required()
 def createProyecto():
     campos_requeridos = ["PROY_NOMBRE", "PROY_DESCRIPCION"]
     peticion = request.json
@@ -99,7 +99,15 @@ def updateProyecto(id):
 @jwt_required()
 def deleteProyecto(id):
     con = current_app.mysql.connection.cursor()
+
+    con.execute("SELECT PROY_ID FROM proyecto WHERE PROY_ID = %s AND PROY_ESTADO = 1", [id])
+    proyecto = con.fetchone()
+
+    if not proyecto:
+        return jsonify({"error": "Proyecto no encontrado"}), 404
+
     con.execute("UPDATE proyecto SET PROY_ESTADO = 0 WHERE PROY_ID = %s", [id])
     con.connection.commit()
 
     return jsonify({"mensaje": "Se ha eliminado el proyecto"})
+
