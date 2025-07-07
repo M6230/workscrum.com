@@ -352,7 +352,8 @@
                 "type": "object",
                 "required": [
                   "PROY_NOMBRE",
-                  "PROY_DESCRIPCION"
+                  "PROY_DESCRIPCION",
+                  "PROY_USU_ID"
                 ],
                 "properties": {
                   "PROY_NOMBRE": {
@@ -360,11 +361,15 @@
                   },
                   "PROY_DESCRIPCION": {
                     "type": "string"
+                  },
+                  "PROY_USU_ID": {
+                    "type": "integer"
                   }
                 },
                 "example": {
                   "PROY_NOMBRE": " Proyecto x",
-                  "PROY_DESCRIPCION": "X proyecto se encarga de..."
+                  "PROY_DESCRIPCION": "X proyecto se encarga de...",
+                  "PROY_USU_ID": 1
                 }
               }
             }
@@ -468,6 +473,24 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Proyecto no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "error": "Proyecto no encontrado"
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -519,74 +542,93 @@
       }
     },
     "/proyectos/editar/{id}": {
-    "put": {
-      "tags": ["Proyectos"],
-      "summary": "Editar un proyecto por ID",
-      "description": "Este endpoint permite editar un proyecto del sistema utilizando su identificador único (ID).",
-      "parameters": [
-        {
-          "name": "id",
-          "in": "path",
-          "required": true,
-          "schema": { "type": "integer" }
-        }
-      ],
-      "requestBody": {
-        "required": true,
-        "content": {
-          "application/json": {
+      "put": {
+        "tags": [
+          "Proyectos"
+        ],
+        "summary": "Editar un proyecto por ID",
+        "description": "Este endpoint permite editar un proyecto del sistema utilizando su identificador único (ID).",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
             "schema": {
-              "type": "object",
-              "required": ["PROY_NOMBRE", "PROY_DESCRIPCION"],
-              "properties": {
-                "PROY_NOMBRE": { "type": "string" },
-                "PROY_DESCRIPCION": { "type": "string" }
-              },
-              "example": {
-                "PROY_NOMBRE": "Proyecto actualizado",
-                "PROY_DESCRIPCION": "Este es el nuevo contenido del proyecto"
-              }
+              "type": "integer"
             }
           }
-        }
-      },
-      "responses": {
-        "200": {
-          "description": "Proyecto actualizado correctamente.",
+        ],
+        "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": [
+                  "PROY_NOMBRE",
+                  "PROY_DESCRIPCION"
+                ],
                 "properties": {
-                  "mensaje": { "type": "string" }
+                  "PROY_NOMBRE": {
+                    "type": "string"
+                  },
+                  "PROY_DESCRIPCION": {
+                    "type": "string"
+                  }
                 },
                 "example": {
-                  "mensaje": "Se ha actualizado el proyecto"
+                  "PROY_NOMBRE": "Proyecto actualizado",
+                  "PROY_DESCRIPCION": "Este es el nuevo contenido del proyecto"
                 }
               }
             }
           }
         },
-        "409": {
-          "description": "Conflicto: ya existe un recurso con la misma información.",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "mensaje": { "type": "string" }
-                },
-                "example": {
-                  "mensaje": "Ya existe un recurso con los mismos datos"
+        "responses": {
+          "200": {
+            "description": "Proyecto actualizado correctamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "mensaje": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "mensaje": "Se ha actualizado el proyecto"
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto: ya existe un recurso con la misma información.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "mensaje": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "mensaje": "Ya existe un recurso con los mismos datos"
+                  }
                 }
               }
             }
           }
-        }
-      },
-      "security": [{ "bearerAuth": [] }]
-    }
-  },
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/sprints/crear": {
       "post": {
         "tags": [
@@ -603,7 +645,8 @@
                 "required": [
                   "SPR_FCH_INICIO",
                   "SPR_FCH_FIN",
-                  "SPR_OBJETIVO"
+                  "SPR_OBJETIVO",
+                  "SPR_PROY_ID"
                 ],
                 "properties": {
                   "SPR_FCH_INICIO": {
@@ -614,12 +657,16 @@
                   },
                   "SPR_OBJETIVO": {
                     "type": "string"
+                  },
+                  "SPR_PROY_ID": {
+                    "type": "integer"
                   }
                 },
                 "example": {
                   "SPR_FCH_INICIO": "2025-06-09",
                   "SPR_FCH_FIN": "2025-07-09",
-                  "SPR_OBJETIVO": " xx-xx"
+                  "SPR_OBJETIVO": " xx-xx",
+                  "SPR_PROY_ID": 1
                 }
               }
             }
@@ -723,6 +770,24 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Sprint no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "error": "Sprint no encontrado"
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -777,77 +842,101 @@
         ]
       }
     },
-   "/sprints/editar/{id}": {
-    "put": {
-      "tags": ["Sprint"],
-      "summary": "Editar un sprint por ID",
-      "description": "Este endpoint permite editar un sprint del sistema utilizando su identificador único (ID).",
-      "parameters": [
-        {
-          "name": "id",
-          "in": "path",
-          "required": true,
-          "schema": { "type": "integer" }
-        }
-      ],
-      "requestBody": {
-        "required": true,
-        "content": {
-          "application/json": {
+    "/sprints/editar/{id}": {
+      "put": {
+        "tags": [
+          "Sprint"
+        ],
+        "summary": "Editar un sprint por ID",
+        "description": "Este endpoint permite editar un sprint del sistema utilizando su identificador único (ID).",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
             "schema": {
-              "type": "object",
-              "required": ["SPR_FCH_INICIO", "SPR_FCH_FIN", "SPR_OBJETIVO"],
-              "properties": {
-                "SPR_FCH_INICIO": { "type": "string", "format": "date" },
-                "SPR_FCH_FIN": { "type": "string", "format": "date" },
-                "SPR_OBJETIVO": { "type": "string" }
-              },
-              "example": {
-                "SPR_FCH_INICIO": "2025-07-01",
-                "SPR_FCH_FIN": "2025-07-15",
-                "SPR_OBJETIVO": "Objetivo actualizado del sprint"
-              }
+              "type": "integer"
             }
           }
-        }
-      },
-      "responses": {
-        "200": {
-          "description": "Sprint actualizado correctamente.",
+        ],
+        "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": [
+                  "SPR_FCH_INICIO",
+                  "SPR_FCH_FIN",
+                  "SPR_OBJETIVO"
+                ],
                 "properties": {
-                  "mensaje": { "type": "string" }
+                  "SPR_FCH_INICIO": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "SPR_FCH_FIN": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "SPR_OBJETIVO": {
+                    "type": "string"
+                  }
                 },
                 "example": {
-                  "mensaje": "Se ha actualizado el sprint"
+                  "SPR_FCH_INICIO": "2025-07-01",
+                  "SPR_FCH_FIN": "2025-07-15",
+                  "SPR_OBJETIVO": "Objetivo actualizado del sprint"
                 }
               }
             }
           }
         },
-        "409": {
-          "description": "Conflicto: ya existe un recurso con la misma información.",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "mensaje": { "type": "string" }
-                },
-                "example": {
-                  "mensaje": "Ya existe un recurso con los mismos datos"
+        "responses": {
+          "200": {
+            "description": "Sprint actualizado correctamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "mensaje": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "mensaje": "Se ha actualizado el sprint"
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto: ya existe un recurso con la misma información.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "mensaje": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "mensaje": "Ya existe un recurso con los mismos datos"
+                  }
                 }
               }
             }
           }
-        }
-      },
-      "security": [{ "bearerAuth": [] }]
-    }
-  },
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/auth/": {
       "post": {
         "tags": [
@@ -863,7 +952,7 @@
                 "type": "object",
                 "required": [
                   "USU_CORREO",
-                  "USU_CONTRASEÑA"
+                  "USU_CONTRASENA"
                 ],
                 "properties": {
                   "USU_CORREO": {
