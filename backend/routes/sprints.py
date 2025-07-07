@@ -27,7 +27,7 @@ def showSprint():
 @sprints_bp.route('/crear', methods=['POST'])
 @jwt_required()
 def createSprint():
-    campos_requeridos = ["SPR_FCH_INICIO", "SPR_FCH_FIN", "SPR_OBJETIVO"]
+    campos_requeridos = ["SPR_FCH_INICIO", "SPR_FCH_FIN", "SPR_OBJETIVO", "SPR_PROY_ID"]
     peticion = request.json
     faltantes = [x for x in campos_requeridos if x not in peticion]
 
@@ -37,6 +37,7 @@ def createSprint():
     fch_inicio = peticion["SPR_FCH_INICIO"]
     fch_fin = peticion["SPR_FCH_FIN"]
     objetivo = peticion["SPR_OBJETIVO"]
+    proy_id = peticion["SPR_PROY_ID"]
 
     con = current_app.mysql.connection.cursor()
     con.execute("""
@@ -54,7 +55,7 @@ def createSprint():
         WHERE SPR_OBJETIVO = %s AND SPR_ESTADO = 1
     """, [objetivo])
     duplicado_obj = con.fetchone()
-
+    
     if duplicado_obj:
         con.close()
         return jsonify({"mensaje": "Ya existe un sprint activo con ese objetivo"}), 409
@@ -62,9 +63,9 @@ def createSprint():
     estado = 1
     uid = uuid.uuid4()
     con.execute("""
-        INSERT INTO sprint (SPR_FCH_INICIO, SPR_FCH_FIN, SPR_OBJETIVO, SPR_ESTADO, SPR_UID)
-        VALUES (%s, %s, %s, %s, %s)
-    """, [fch_inicio, fch_fin, objetivo, estado, uid])
+        INSERT INTO sprint (SPR_FCH_INICIO, SPR_FCH_FIN, SPR_OBJETIVO, SPR_ESTADO, SPR_UID, SPR_PROY_ID)
+        VALUES (%s, %s, %s, %s, %s, %s)
+    """, [fch_inicio, fch_fin, objetivo, estado, uid, proy_id])
     con.connection.commit()
     con.close()
 
@@ -106,6 +107,12 @@ def updateSprint(id):
     if duplicado_obj:
         con.close()
         return jsonify({"mensaje": "Ya existe otro sprint activo con ese objetivo"}), 409
+    
+    con.execute("SELECT SPR_ID FROM sprint WHERE SPR_ID = %s", [id])
+    sprint = con.fetchone()
+
+    if not sprint:
+        return jsonify({"error": "Sprint no encontrado"}), 404
 
     estado = 1
     uid = uuid.uuid4()

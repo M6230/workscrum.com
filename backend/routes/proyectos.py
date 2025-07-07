@@ -26,7 +26,7 @@ def showProyectos():
 @proyectos_bp.route('/crear', methods=['POST'])
 @jwt_required()
 def createProyecto():
-    campos_requeridos = ["PROY_NOMBRE", "PROY_DESCRIPCION"]
+    campos_requeridos = ["PROY_NOMBRE", "PROY_DESCRIPCION", "PROY_USU_ID"]
     peticion = request.json
     faltantes = [x for x in campos_requeridos if x not in peticion]
 
@@ -35,6 +35,7 @@ def createProyecto():
 
     nombre = peticion["PROY_NOMBRE"]
     descripcion = peticion["PROY_DESCRIPCION"]
+    usu_id = peticion["PROY_USU_ID"]
 
     con = current_app.mysql.connection.cursor()
     con.execute("SELECT * FROM proyecto WHERE PROY_NOMBRE = %s AND PROY_ESTADO = 1", [nombre])
@@ -47,9 +48,9 @@ def createProyecto():
     estado = 1
     uid = uuid.uuid4()
     con.execute("""
-        INSERT INTO proyecto (PROY_NOMBRE, PROY_DESCRIPCION, PROY_ESTADO, PROY_UID)
-        VALUES (%s, %s, %s, %s)
-    """, [nombre, descripcion, estado, uid])
+        INSERT INTO proyecto (PROY_NOMBRE, PROY_DESCRIPCION, PROY_ESTADO, PROY_UID, PROY_USU_ID)
+        VALUES (%s, %s, %s, %s, %s)
+    """, [nombre, descripcion, estado, uid, usu_id])
     con.connection.commit()
     con.close()
 
@@ -80,6 +81,12 @@ def updateProyecto(id):
     if duplicado:
         con.close()
         return jsonify({"mensaje": "Ya existe otro proyecto activo con ese nombre"}), 409
+    
+    con.execute("SELECT PROY_ID FROM proyecto WHERE PROY_ID = %s AND PROY_ESTADO = 1", [id])
+    proyecto = con.fetchone()
+
+    if not proyecto:
+        return jsonify({"error": "Proyecto no encontrado"}), 404
 
     estado = 1
     uid = uuid.uuid4()
