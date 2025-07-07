@@ -23,28 +23,6 @@ try:
     cursor.execute("CREATE DATABASE IF NOT EXISTS db_scrum")
     cursor.execute("USE db_scrum")
 
-    # Crear tabla proyecto
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS proyecto (
-        PROY_ID INT AUTO_INCREMENT PRIMARY KEY,
-        PROY_NOMBRE VARCHAR(255) NOT NULL,
-        PROY_DESCRIPCION TEXT,
-        PROY_ESTADO VARCHAR(50),
-        PROY_UID VARCHAR(100) UNIQUE NOT NULL
-    )
-    ''')
-
-    # Crear tabla sprint
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS sprint (
-        SPR_ID INT AUTO_INCREMENT PRIMARY KEY,
-        SPR_FCH_INICIO DATE NOT NULL,
-        SPR_FCH_FIN DATE NOT NULL,
-        SPR_OBJETIVO TEXT,
-        SPR_ESTADO VARCHAR(50),
-        SPR_UID VARCHAR(100) UNIQUE NOT NULL
-    )
-    ''')
 
     # Crear tabla usuarios
     cursor.execute('''
@@ -58,6 +36,37 @@ try:
         USU_UID VARCHAR(100) UNIQUE NOT NULL,
         USU_CONTRASENA VARCHAR(255) NOT NULL
     )
+    ''')
+
+   # Crear tabla proyecto
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS proyecto (
+            PROY_ID INT AUTO_INCREMENT PRIMARY KEY,
+            PROY_NOMBRE VARCHAR(255) NOT NULL,
+            PROY_DESCRIPCION TEXT,
+            PROY_ESTADO VARCHAR(50),
+            PROY_UID VARCHAR(100) UNIQUE NOT NULL,
+            PROY_USU_ID INT NOT NULL,
+            FOREIGN KEY (PROY_USU_ID) REFERENCES usuarios(USU_ID)
+                ON DELETE CASCADE
+                ON UPDATE CASCADE
+        )
+    ''')
+
+    # Crear tabla sprint
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS sprint (
+            SPR_ID INT AUTO_INCREMENT PRIMARY KEY,
+            SPR_FCH_INICIO DATE NOT NULL,
+            SPR_FCH_FIN DATE NOT NULL,
+            SPR_OBJETIVO TEXT,
+            SPR_ESTADO VARCHAR(50),
+            SPR_UID VARCHAR(100) UNIQUE NOT NULL,
+            SPR_PROY_ID INT NOT NULL,
+            FOREIGN KEY (SPR_PROY_ID) REFERENCES proyecto(PROY_ID)
+                ON DELETE CASCADE
+                ON UPDATE CASCADE
+        )
     ''')
 
 
